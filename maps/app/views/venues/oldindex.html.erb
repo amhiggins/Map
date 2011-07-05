@@ -1,0 +1,290 @@
+<title>Crimespotting</title>
+
+	<%= javascript_include_tag 'protovis.js' %>
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAYZ9eMYFYusxZt-1RKXLI7RQGpXqX26B62_lhdlIUxPTUm0CSORRw1BkwdprB1xQ3Xa8KfbgKAacxlw" type="text/javascript"></script>
+
+    <style type="text/css">
+
+body, html {
+  height: 100%;
+  margin: 0;
+}
+
+#map {
+  height: 80%;
+  width: 80%
+}
+
+#map .canvas {
+  position: absolute;
+}
+
+    </style>
+
+    <script type="text/javascript+protovis">
+
+var crimes = <%= raw @arrayVenues %>;
+
+  /* functions */
+  /* get a js date for map display */
+  function getDate(d){
+		var date = new Date(d);
+		date = date.toLocaleString();
+	return date;
+  }
+  
+/* data arrays of the crimes, will be filled according to timestamps */
+  var weeklyCrimes = new Array();
+  var hourlyCrimes = new Array();
+  var dailyCrimes = new Array();
+  var twoDaysCrimes = new Array();
+  
+/*Fills the crime arrays according to timestamps */
+ // var currDate = new Date();
+ //var hcurrDate = new Date();
+ // var wcurrDate = new Date();
+  var currDate = new Date(2011, 5, 29, 0, 0, 0, 0);
+  var twocurrDate = new Date(2011, 5, 29, 0, 0, 0, 0);
+  var wcurrDate = new Date(2011, 5, 29, 0, 0, 0, 0);	//for weekly
+  var modHour = new Date(2011, 5, 29, 0, 0, 0, 0);	//for hourly
+
+ 
+  modHour.setHours(modHour.getHours()- 1); //sets the hour back one
+  
+ modDate = currDate.setHours(0); //sets the day back to the start; map displays everything for that day so far
+ mod2Date = twocurrDate.setDate(twocurrDate.getDate()-2); //sets the date back two days
+ var modWeek = wcurrDate.setDate(wcurrDate.getDate()-7); //sets the day back 7 (6 +1 from wcurrDate) to get a week's time
+
+ 
+  for(var i in crimes){
+		var convDate = new Date(crimes[i].date)
+		if( modWeek <= convDate){				//if same week
+				weeklyCrimes.push(crimes[i]);
+				
+			if(mod2Date <= convDate){			//in the last two days
+				twoDaysCrimes.push(crimes[i]);
+			
+				if( modDate <= convDate){ 			//if same day
+					dailyCrimes.push(crimes[i]);
+					
+					if(modHour <= convDate){ 		//if same day and same hour
+						hourlyCrimes.push(crimes[i]);
+					}
+				}
+			}
+		}
+  }
+  
+  /* crimes for a certain week */
+  pickedWeekCrimes = new Array();
+  
+  function getACertainWeek(date){
+    var modWeek = date.setDay(date.getDat
+	for(var i in crimes){
+		var convDate = new Date(crimes[i].date)
+		if( pickedWeek <= convDate){
+			pickedWeekCrimes.push(crimes[i]);
+		}
+	}
+  	return pickedWeekCrimes;
+  }
+
+
+//assigns the inital data to come up
+ucrimes = dailyCrimes;
+
+/* 
+	Take in the value string from menu, to change what crime array
+	the map will show
+*/
+function changeData(value){
+	if(value == "weeklyCrimes") { Canvas(weeklyCrimes); useData = crimes; return "weeklyCrimes"; }
+	else if(value == "twoDaysCrimes"){Canvas(twoDaysCrimes); useData = twoDaysCrimes; return "two Days";}
+	else if(value == "dailyCrimes") { Canvas(dailyCrimes); useData = crimes; return "dailyCrimes"; }
+	else if(value == "crimes") { Canvas(crimes); useData = crimes; return "crimes";}
+	else{ Canvas(hourlyCrimes); useData = crimes; return "hourly"; }
+}
+
+var codes = [
+  { code: "1", name: "Malicious Lingering", category: "petty"},
+  { code: "2", name: "Disturbing the Peace", category: "quality"},
+  { code: "3", name: "Common Criminal", category: "property"},
+  { code: "4", name: "Wanted Felon", category: "property"},
+  { code: "5", name: "Enemy of the State", category: "violent"}
+];
+/*
+	shape of icon that appears on map, according to code field
+*/
+var shape = {
+	1: "triangle" ,
+	2:  "circle" ,
+	3:  "square" ,
+	4:  "square" ,
+	5:  "diamond" 
+};
+
+/*
+	gives name and category of crime based on the code field,
+	which is assigned in venue.rb.  It is assigned based on action count. 
+
+*/
+var getcode = {
+   1: {name: "Malicious Lingering", category: "petty"},
+   2: {name: "Disturbing the Peace", category: "quality"},
+   3: {name: "Common Criminal", category: "property"},
+   4: {name: "Wanted Felon", category: "property"},
+   5: {name: "Enemy of the State", category: "violent"}
+};
+	
+/*
+	assigns color to the dot on map based the category field assigned in getcode array
+	from the code field,
+*/
+	
+var colors = {
+  violent: { light: "rgba(217, 0, 0, .8)", dark: "rgb(163, 0, 0)" },
+  property: {light: "rgba(225, 104, 25, .8)", dark: "rgb(255, 104, 25)"},
+  quality: { light: "rgba(35, 150, 94, .8)", dark: "rgb(26, 112, 70)" },
+  petty: { light: "rgba(52, 137, 186, .8)", dark: "rgb(39, 103, 139)" }
+};
+
+codes.forEach(function(x) colors[x.code] = colors[x.category]);
+
+/* spot to change the data thats rendered on map */
+function Canvas(arr) {
+  this.ucrimes = arr;
+}
+
+  Canvas.prototype = pv.extend(GOverlay);
+
+Canvas.prototype.initialize = function(map) {
+  this.map = map;
+  this.canvas = document.createElement("div");
+  this.canvas.setAttribute("class", "canvas");
+  map.getPane(G_MAP_MAP_PANE).parentNode.appendChild(this.canvas);
+};
+
+Canvas.prototype.redraw = function(force) {
+  if (!force) return;
+   c = this.canvas, m = this.map, r = 20;
+
+  /* Get the pixel locations of the crimes. */
+  var pixels = this.ucrimes.map(function(d) {
+      return m.fromLatLngToDivPixel(new GLatLng(d.lat, d.lon));
+    });
+
+  /* Update the canvas bounds. Note: may be large. */
+  function x(p) p.x; function y(p) p.y;
+  var x = { min: pv.min(pixels, x) - r, max: pv.max(pixels, x) + r };
+  var y = { min: pv.min(pixels, y) - r, max: pv.max(pixels, y) + r };
+  c.style.width = (x.max - x.min) + "px";
+  c.style.height = (y.max - y.min) + "px";
+  c.style.left = x.min + "px";
+  c.style.top = y.min + "px";
+  
+  
+  /* Render the visualization. */
+
+ vis = new pv.Panel()
+      .canvas(c)
+      .left(-x.min)
+      .top(-y.min)
+
+    var dot = vis.add(pv.Panel)
+		
+      .data(this.ucrimes)
+
+    .add(pv.Dot)
+      .left(function() pixels[this.parent.index].x)
+      .top(function() pixels[this.parent.index].y)
+	  .shape(function(x, d) shape[d.code])
+      .strokeStyle(function(x, d) colors[d.code].dark)
+      .fillStyle(function(x, d) colors[d.code].light)
+      .size(140)
+	  .title(function(x,d) "Id: " + String(d.id) + "\n" + getcode[d.code].name + "\nWith an action count of: " + d.actioncount + "\nAt: " + getDate(d.date)  + "\n" )
+	  .event("mouseover", function() this.fillStyle(function(x, d) colors[d.code].dark), function() this.strokeStyle(function(x, d) colors[d.code].light) )
+	  .event("mouseout", function() this.fillStyle(function(x, d) colors[d.code].light), function() this.strokeStyle(function(x, d) colors[d.code].dark) )
+	  .event("click", function() this.text(function(x, d){  d.venue_id + "\n" + d.actioncount + "\n"}), function() this.textStyle("black") )
+	.anchor("center").add(pv.Label)
+      .textStyle("white")
+      .text(function(x, d) d.code)
+	
+	.anchor("left").add(pv.Label)
+	.text(function(x, d){ d.venue_id + "\n Action Count :" + d.actioncount + "\n"; })
+
+    vis.render();
+};
+
+/* Restrict minimum and maximum zoom levels. */
+G_NORMAL_MAP.getMinimumResolution = function() 11;
+G_NORMAL_MAP.getMaximumResolution = function() 14;
+
+var map = new GMap2(document.getElementById("map"));
+map.setCenter(new GLatLng(37.45, -122.13), 12);
+map.setUI(map.getDefaultUI());
+map.addOverlay(new Canvas(this.ucrimes));
+
+/*
+	updates the map by using the map and canvas from Canvas.protoype,
+	but recreates the pv Panel so that vis.render() can be accessed.
+*/
+function update(){
+	
+/* to update the new map, get the map var from GMap2 */
+	var changeMap = map;
+/* to get access to the canvas from Canvas.prototype.intialize */
+	var changeC = c;
+	changeC = this.canvas, m = this.map, r = 20;
+
+/* Get the pixel locations of the crimes. */
+	var pixels = this.ucrimes.map(function(d) {
+	  return m.fromLatLngToDivPixel(new GLatLng(d.lat, d.lon));
+	});
+
+/* Update the canvas bounds. Note: may be large. */
+	function x(p) p.x; function y(p) p.y;
+	var x = { min: pv.min(pixels, x) - r, max: pv.max(pixels, x) + r };
+	var y = { min: pv.min(pixels, y) - r, max: pv.max(pixels, y) + r };
+	c.style.width = (x.max - x.min) + "px";
+	c.style.height = (y.max - y.min) + "px";
+	c.style.left = x.min + "px";
+	c.style.top = y.min + "px";
+  
+/* render the visualization */
+	vis.render();
+
+/* need this block to keep map's zoom levels rendering with consistant crime array */
+	var map = new GMap2(document.getElementById("map"));
+	map.setCenter(new GLatLng(37.45, -122.13), 12);
+	map.setUI(map.getDefaultUI());
+	map.addOverlay(new Canvas(this.ucrimes));
+}//end update
+
+    </script>
+  </head>
+
+  <body onunload="GUnload()">
+
+	<br>
+	<br>
+  <div align="right">
+      <b>View:</b>
+      <select id="menu" onchange = "changeData(this.value); update();" >  
+	    <option value= crimes> Crimes </option>
+        <option value= weeklyCrimes>This Week's Crimes</option>
+		<option value= twoDaysCrimes> Last Two Days' Crimes</option>
+        <option value= dailyCrimes selected>Crimes Within the Day</option>
+        <option value= hourlyCrimes >Crimes Within the Hour</option>
+      </select>
+    </div>
+	
+
+	<br>
+
+	<div id="map"></div>
+	<br>
+	<%= link_to 'New Venue', new_venue_path %>
+
+  </body>
+
+</html>

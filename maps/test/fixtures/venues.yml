@@ -1,0 +1,15 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  timestamp: 
+  latitude: 1.5
+  longitude: 1.5
+  id: 
+  actioncount: 
+
+two:
+  timestamp: 
+  latitude: 1.5
+  longitude: 1.5
+  id: 
+  actioncount: 
