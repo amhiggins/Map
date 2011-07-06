@@ -1,10 +1,7 @@
 <title>Crimespotting</title>
 
 	<%= javascript_include_tag 'protovis.js' %>
-
-
     <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAYZ9eMYFYusxZt-1RKXLI7RQGpXqX26B62_lhdlIUxPTUm0CSORRw1BkwdprB1xQ3Xa8KfbgKAacxlw" type="text/javascript"></script>
-
     <style type="text/css">
 	
 
@@ -66,6 +63,7 @@ var crimes = <%= raw @arrayVenues %>;
   }
   
 /* data arrays of the crimes, will be filled according to timestamps */
+  var monthlyCrimes = new Array();
   var inSevenDaysCrimes = new Array();
   var weeksCrimes = new Array();
   var hourlyCrimes = new Array();
@@ -76,6 +74,7 @@ var crimes = <%= raw @arrayVenues %>;
   var lastweekMonthCrimes = new Array();
   var halfHourCrimes = new Array();
   var quarterHourCrimes = new Array();
+  var lastFiveMinCrimes = new Array();
   
 /* Fills the crime arrays according to timestamps */
  // var currDate = new Date();
@@ -86,36 +85,45 @@ var crimes = <%= raw @arrayVenues %>;
   var currDate = new Date(2011, 6, 28, 2, 15, 0, 0);
   var twocurrDate = new Date(currDate.getFullYear(), currDate.getMonth(), currDate.getDate(), 0, 0, 0, 0);
   var wcurrDate = new Date(2011, 6, 28, 2, 15, 0, 0);	//for weekly
-  
+ 
+  var modMonth = new Date (currDate.getFullYear(), currDate.getMonth()-1, 0, 0, 0, 0);
   var modHour = new Date(currDate.getFullYear(), currDate.getMonth(), currDate.getDate(), currDate.getHours()-1, 0, 0);	//for hourly, set the hour back by 1
   var modHalfHour = new Date(currDate.getFullYear(), currDate.getMonth(), currDate.getDate(), currDate.getHours(), currDate.getMinutes()-30, 0);	//for half hour
   var modFifteenMin = new Date(currDate.getFullYear(), currDate.getMonth(), currDate.getDate(), currDate.getHours(), currDate.getMinutes()-15, 0); //within last 15 min
-
+  var modFiveMin = new Date (currDate.getFullYear(), currDate.getMonth(), currDate.getDate(), currDate.getHours(), currDate.getMinutes()-5, 0);	  //within last 5 min
+  
  modDate = currDate.setHours(0); //sets the day back to the start; map displays everything for that day so far
  mod2Date = twocurrDate.setDate(twocurrDate.getDate()-1); //sets the date back a day, to get the crimes for the last two days
  var modWeek = wcurrDate.setDate(wcurrDate.getDate()-7); //sets the day back 7 (6 +1 from wcurrDate) to get a week's time
  
   for(var i in crimes){
 	var convDate = new Date(crimes[i].date)
-	if( modWeek <= convDate){				//in the last 7 days
-			inSevenDaysCrimes.push(crimes[i]);
-			
-		if(twocurrDate <= convDate){			//in the last two days
-			twoDaysCrimes.push(crimes[i]);
-		
-			if( modDate <= convDate){ 			//if same day
-				dailyCrimes.push(crimes[i]);
+	if( modMonth <= convDate){					//in the last month
+		monthlyCrimes.push(crimes[i]);
+		if( modWeek <= convDate){				//in the last 7 days
+				inSevenDaysCrimes.push(crimes[i]);
 				
-				if(modHour <= convDate){ 		//if same day and same hour
-					hourlyCrimes.push(crimes[i]);
+			if(twocurrDate <= convDate){			//in the last two days
+				twoDaysCrimes.push(crimes[i]);
+			
+				if( modDate <= convDate){ 			//if same day
+					dailyCrimes.push(crimes[i]);
 					
-					if(modHalfHour <= convDate){	//in the last half hour
-						halfHourCrimes.push(crimes[i]);
+					if(modHour <= convDate){ 		//if same day and same hour
+						hourlyCrimes.push(crimes[i]);
 						
-						if(modFifteenMin <= convDate){
-							quarterHourCrimes.push(crimes[i]);
-						}
-					}						
+						if(modHalfHour <= convDate){	//in the last half hour
+							halfHourCrimes.push(crimes[i]);
+							
+							if(modFifteenMin <= convDate){
+								quarterHourCrimes.push(crimes[i]);
+								
+								if(modFiveMin <= convDate){	//in last 5 min
+									lastFiveMinCrimes.push(crimes[i]);
+								}
+							}
+						}						
+					}
 				}
 			}
 		}
@@ -225,6 +233,7 @@ function getLastWeek(){
 */
 function changeData(value){
 	if(value == "inSevenDaysCrimes") { Canvas(inSevenDaysCrimes); return "inSevenDaysCrimes";}
+	else if(value == "monthlyCrimes") { Canvas(monthlyCrimes); return "monthlyCrimes";}
 	else if(value == "weeksCrimes"){Canvas(weeksCrimes); return "weeks crimes";}
 	else if(value == "lastweekMonthCrimes"){Canvas(lastweekMonthCrimes); return "lastweekMonthCrimes";}
 	else if(value == "prevWeeksCrimes"){Canvas(prevWeeksCrimes); return "last weeks";}
@@ -233,6 +242,7 @@ function changeData(value){
 	else if(value == "crimes") { Canvas(crimes);  return "crimes";}
 	else if(value == "halfHourCrimes") { Canvas(halfHourCrimes); return "halfHourCrimes";}
 	else if(value == "quarterHourCrimes") { Canvas(quarterHourCrimes); return "quarterHourCrimes";}
+	else if(value == "lastFiveMinCrimes") { Canvas(lastFiveMinCrimes); return "lastFiveMinCrimes";}	
 	else{ Canvas(hourlyCrimes); return "hourly";}
 }
 
@@ -358,7 +368,7 @@ Canvas.prototype.redraw = function(force) {
 };
 
 /* Restrict minimum and maximum zoom levels. */
-G_NORMAL_MAP.getMinimumResolution = function() 6;
+G_NORMAL_MAP.getMinimumResolution = function() 1;
 G_NORMAL_MAP.getMaximumResolution = function() 18;
 
 var map = new GMap2(document.getElementById("map"));
@@ -412,6 +422,7 @@ function update(){
       <b>View:</b>
       <select id="menu" onchange = "changeData(this.value); update();" >  
 	    <option value= crimes> Crimes </option>
+		<option value= monthlyCrimes> Montly Crimes </option>
         <option value= inSevenDaysCrimes > Crimes in the last 7 Days </option>
 		<option value= weeksCrimes> Last Month's This Week's Crimes </option>
 		<option value= lastweekMonthCrimes> Last Month's week ago Crimes</option>
@@ -421,6 +432,7 @@ function update(){
         <option value= hourlyCrimes > Crimes Within the Hour </option>
 		<option value= halfHourCrimes> Crimes Within 30 min </option> 
 		<option value= quarterHourCrimes> Crimes Within Last 15 min </option>
+		<option value= lastFiveMinCrimes> Crimes Within Last 5 min</option>
       </select>
     </div>
 	<br>

@@ -1,5 +1,5 @@
 # MySQL.  Versions 4.1 and 5.0 are recommended.
-#
+#rake db:setup RAILS_ENV=production
 # Install the MySQL driver:
 #   gem install mysql2
 #
@@ -32,8 +32,8 @@ production:
   adapter: mysql2
   encoding: utf8
   reconnect: false
-  database: maps_production
+  database: rrl_bilt
   pool: 5
   username: root
-  password: rrlabs
-  host: localhost
+  password: red_robot_root
+  host: 10.1.10.200
