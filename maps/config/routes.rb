@@ -1,4 +1,6 @@
 Maps::Application.routes.draw do
+  resources :pois
+
   resources :venues
 
   resources :posts

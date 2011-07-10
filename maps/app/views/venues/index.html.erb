@@ -2,7 +2,8 @@
 
 	<%= javascript_include_tag 'protovis.js' %>
     <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAYZ9eMYFYusxZt-1RKXLI7RQGpXqX26B62_lhdlIUxPTUm0CSORRw1BkwdprB1xQ3Xa8KfbgKAacxlw" type="text/javascript"></script>
-    <style type="text/css">
+	<%= javascript_include_tag 'backImages.js' %>
+	<style type="text/css">
 	
 
 body, html {
@@ -296,6 +297,129 @@ var colors = {
   petty: { url: "images\\blue.png", rolloverUrl: "images\\aqua.png", light: "rgba(52, 137, 186, .8)", dark: "rgb(39, 103, 139)" }
 };
 
+/*
+	Extra landmarks the map will render, these ones are specifically drawn for the city
+*/
+var backImages = [
+  { id: "Red Robot Labs", lat: 37.819928, lon: -122.4786275,  url: "images\\landmark_ggb.png" }, 
+  { id: "Golden Gate Bridge", lat: 37.424686, lon: -122.147224, url: "images\\landmark_rrl.png" },
+  { id: "Seattle Space Needle", lat: 47.620519 , lon: -122.349256, url: "images\\landmark_space_needle.png" },
+  { id: "Seattle Pacific Science Center", lat: 47.61921088014433 , lon: -122.35166788101196, url: "images\\seattle_pacific_science_center.png" },
+  { id: "Seattle Space Needle", lat: 47.88688085106898 , lon: -105.31494140625, url: "images\\landmark_space_needle.png" },
+  { id: "Seattle Music Project", lat: 47.62146716020692 , lon: -122.34832048416138, url: "images\\seattle_science_museum.png" },
+  { id: "Seattle Aquarium", lat: 47.60747954750836, lon: -122.34261274337769, url: "images\\seattle_aquarium.png" },
+  { id: "Seattle Pikes Place", lat: 47.60772548407546, lon: -122.34075665473938, url: "images\\seattle_pikes_place.png" },  
+  { id: "Seattle Nindendo", lat: 47.65102121829412, lon: -122.13931202888489, url: "images\\seattle_nindendo.png" },
+  { id: "Seattle Macrosoft ", lat: 47.64460287340262, lon: -122.13700532913208, url: "images\\seattle_macrosoft.png" },
+  { id: "Washington University", lat: 47.65758330494931, lon: -122.30581283569336, url: "images\\seattle_washington_university.png" },
+  { id: "Seattle Gas Works", lat: 47.64532569939822 , lon: -122.33486652374268, url: "images\\seattle_gasworks.png" },
+  { id: "Seattle Columbia Building", lat: 47.60468012920853 , lon: -122.33066618442535, url: "images\\seattle_columbia_building.png" },
+  { id: "Seattle Safeco Field", lat: 47.59144054050426 , lon: -122.33244180679321, url: "images\\seattle_safeco_field.png" },
+  { id: "Seattle Benaroya Hall", lat: 47.60810162011777 , lon: -122.3367977142334, url: "images\\seattle_benaroya_hall.png" },
+  { id: "Boeing Muesum", lat: 47.518417998541324 , lon: -122.29671478271484, url: "images\\seattle_boeing_museum.png" },
+  { id: "Chittenden Locks", lat: 47.665990676529226 , lon: -122.39811301231384, url: "images\\seattle_chittenden_locks.png" },
+  { id: "Google HQ", lat: 37.42206582174193 , lon: -122.08457350730896, url: "images\\google_headquarters.png" },
+  { id: "Google amphitheater", lat: 37.42667534283453, lon: -122.08086133003235, url: "images\\google_amphitheatre.png" }, 
+  { id: "Google geo home", lat: 37.42243220810658 , lon: -122.0880925655365, url: "images\\google_geo_home.png" }, 
+  { id: "Google Android", lat: 37.420089008566386 , lon:  -122.08412289619446, url: "images\\google_android.png" }, 
+  { id: "Google Cittenden", lat: 37.42641973911531 , lon:  -122.07149505615234, url: "images\\google_crittenden.png" }, 
+  { id: "SJ airport", lat: 37.36169838235299 , lon: -121.92764282226562, url: "images\\l_airport.png" },  
+  { id: "SF airport", lat: 37.61912651670701 , lon: -122.38168716430664, url: "images\\l_airport.png" },  
+  { id: "Oakland airport", lat: 37.71478815132924 , lon: -122.21345901489258, url: "images\\l_airport.png" },  
+  { id: "Portland airport", lat: 45.53743727875853 , lon: -122.94705390930176, url: "images\\l_airport.png" },  
+  { id: "Seattle airport", lat: 47.53076330973474 , lon: -122.30117797851562, url: "images\\l_airport.png" },    
+];
+
+//dynamically allocated landmarks
+var modMoreBackImages = new Array();
+
+for(var i in moreBackImages){
+	var set = new Array();
+	var temp = moreBackImages[i].types;	//types is an array
+	var type = temp[0];
+	switch(type) {
+		case "school":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_school.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "gas_station":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_gas_station2.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "food":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\s_store2.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "restaurant":
+			if(moreBackImages[i].name ==  "Mc Donald's") { 	set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_fastfood3.png" };
+				modMoreBackImages.push(set);}
+			else if( (i % 2) == 0) {   set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_restaurant2.png" };
+				modMoreBackImages.push(set); }
+			else {  set = {id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\s_fastfood2.png" };
+				modMoreBackImages.push(set); }
+			break;
+		case "bar":
+			if( (i % 2) == 0 ){
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\s_bar3.png" };
+			modMoreBackImages.push(set); }
+			else if( (i % 3) == 0) { set =  {id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\s_bar2.png" };
+				modMoreBackImages.push(set);
+			}
+			else{ set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\s_bar1.png" };
+				modMoreBackImages.push(set);
+			}
+			break;
+		case "bank":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\s_bank1.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "lodging":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_hotel3.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "cafe":
+			if(moreBackImages[i].name ==  "Starbucks"){  set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_coffeeshop3.png" };
+				modMoreBackImages.push(set);
+			}
+			else { set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_coffeeshop2.png" };
+				modMoreBackImages.push(set);
+			}
+			break;
+		case "store":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\s_store1.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "grocery_or_supermarket":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\s_store2.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "police":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_policestation.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "hospital":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_hospital.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "train_station":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_trainstation.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "transit_station":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_trainstation.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "clothing_store":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_store3.png" };
+			modMoreBackImages.push(set);
+			break;
+		case "airport":
+			set = { id: moreBackImages[i], lat: moreBackImages[i].geometry.location.lat, lon: moreBackImages[i].geometry.location.lng , types: moreBackImages[i].types, url: "images\\l_airport.png" };
+			modMoreBackImages.push(set);
+			break;
+	}
+}
+
 codes.forEach(function(x) colors[x.code] = colors[x.category]);
 
 /*  function that changes the data thats rendered on map */
@@ -315,10 +439,20 @@ Canvas.prototype.initialize = function(map) {
 
 Canvas.prototype.redraw = function(force) {
   if (!force) return;
-   c = this.canvas, m = this.map, r = 20;
+   c = this.canvas, m = this.map, r = 400;	//r changes how far the panel will be rendered/how far away from a crime a landmark will be rendered
 
   /* Get the pixel locations of the crimes. */
   var pixels = this.ucrimes.map(function(d) {
+      return m.fromLatLngToDivPixel(new GLatLng(d.lat, d.lon));
+    });
+	
+	//used by backImages
+	var ipixels = backImages.map(function(d) {
+      return m.fromLatLngToDivPixel(new GLatLng(d.lat, d.lon));
+    });
+	
+	//used by moreBackImages
+	var hpixels = modMoreBackImages.map(function(d) {
       return m.fromLatLngToDivPixel(new GLatLng(d.lat, d.lon));
     });
 
@@ -330,8 +464,8 @@ Canvas.prototype.redraw = function(force) {
   c.style.height = (y.max - y.min) + "px";
   c.style.left = x.min + "px";
   c.style.top = y.min + "px";
-  
-  
+ 
+ 
   /* Render the visualization. */
  vis = new pv.Panel()
       .canvas(c)
@@ -353,17 +487,29 @@ Canvas.prototype.redraw = function(force) {
 	.anchor("center").add(pv.Label)
       .textStyle("white")
       .text(function(x, d) d.code)
-/*	  
-	.anchor("top")
-		.add(pv.Image)
-			.width(30)
-			.height(30)
-			.url("images\\graySquare.png")
-			.visible(false)
-		.anchor("center").add(pv.Label)
-			.textStyle("black")
-			.text("test")
-*/	
+
+	vis.add(pv.Panel)
+		.data(backImages)
+	.add(pv.Image)
+	 .width(50)
+	 .height(50)
+	//	.width(function(d) -x.min  ) 
+	//	.height(function(d)  -y.min ) 
+
+	.url(function(x, d) d.url)
+    .left(function() ipixels[this.parent.index].x - 15)	//modified -15 to place image correctly
+    .top(function() ipixels[this.parent.index].y - 10)		//modified -10 to place image correctly
+	
+	vis.add(pv.Panel)
+		.data(modMoreBackImages)
+	.add(pv.Image)
+	 .width(40)
+	 .height(40)
+
+	.url(function(x, d) d.url)
+    .left(function() hpixels[this.parent.index].x - 15)	//modified -15 to place image correctly
+    .top(function() hpixels[this.parent.index].y - 10)		//modified -10 to place image correctly
+	 
 	.root.render();
 };
 
@@ -371,22 +517,24 @@ Canvas.prototype.redraw = function(force) {
 G_NORMAL_MAP.getMinimumResolution = function() 1;
 G_NORMAL_MAP.getMaximumResolution = function() 18;
 
+
+
 var map = new GMap2(document.getElementById("map"));
 map.setCenter(new GLatLng(37.45, -122.13), 12);
 map.setUI(map.getDefaultUI());
 map.addOverlay(new Canvas(this.ucrimes));
+
 
 /*
 	updates the map by using the map and canvas from Canvas.protoype,
 	but recreates the pv Panel so that vis.render() can be accessed.
 */
 function update(){
-	
 	/* to update the new map, get the map var from GMap2 */
 	var changeMap = map;
 	/* to get access to the canvas from Canvas.prototype.intialize */
 	var changeC = c;
-	changeC = this.canvas, m = this.map, r = 30;
+	changeC = this.canvas, m = this.map, r = 300;	//r changes how far the panel will be rendered/how far away from a crime a landmark will be rendered
 
 	/* Get the pixel locations of the crimes. */
 	var pixels = this.ucrimes.map(function(d) {
@@ -407,7 +555,7 @@ function update(){
 
 	/* need this block to keep map's zoom levels rendering with consistant crime array */
 	var map = new GMap2(document.getElementById("map"));
-	map.setCenter(new GLatLng(37.45, -122.13), 12);
+	map.setCenter(new GLatLng(37.45, -122.13), 10);
 	map.setUI(map.getDefaultUI());
 	map.addOverlay(new Canvas(this.ucrimes));
 }//end update
@@ -438,6 +586,6 @@ function update(){
 	<br>
 	<div id="map"></div>
 	<br>
-	<%= link_to 'New Venue', new_venue_path %>
   </body>
 </html>
+

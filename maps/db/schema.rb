@@ -10,7 +10,16 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110719220750) do
+ActiveRecord::Schema.define(:version => 20110719220751) do
+
+  create_table "pois", :force => true do |t|
+    t.float    "lat"
+    t.float    "lon"
+    t.string   "name"
+    t.string   "type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "posts", :force => true do |t|
     t.string   "name"
