@@ -16,7 +16,7 @@ ActiveRecord::Schema.define(:version => 20110719220751) do
     t.float    "lat"
     t.float    "lon"
     t.string   "name"
-    t.string   "type"
+    t.string   "buildingType"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

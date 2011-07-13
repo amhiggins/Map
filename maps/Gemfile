@@ -17,6 +17,7 @@ gem 'mysql2', '< 0.3'
  gem 'ruby-debug'
 # gem 'ruby-debug19', :require => 'ruby-debug'
 
+gem 'json'
 # Bundle the extra gems:
 # gem 'bj'
 # gem 'nokogiri'

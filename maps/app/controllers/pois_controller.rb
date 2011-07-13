@@ -2,19 +2,23 @@ class PoisController < ApplicationController
   # GET /pois
   # GET /pois.xml
   def index
-    @pois = Poi.all
+    
+	@pois = Poi.all
 	
-	@arrayPoi = []
-
-	@arrayPoi = Poi.all.map{ |p|
+	@arrayPois = []
+	#debugger
+	@arrayPois = Poi.all.map{ |p|
+				#debugger
 					p.getHash()
-					}
-	
-	 @arrayPoi = @arrayPoi.to_json
+					
+				}
+	#debugger
+	 @arrayPois = @arrayPois.to_json
 
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @pois }
+	  format.json {render :json => @pois }
     end
   end
 

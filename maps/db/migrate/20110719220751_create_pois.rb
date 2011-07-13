@@ -5,7 +5,7 @@ class CreatePois < ActiveRecord::Migration
       t.float :lat
       t.float :lon
       t.string :name
-	  t.string :type
+	  t.string :buildingType
 
       t.timestamps
     end

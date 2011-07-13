@@ -25,7 +25,8 @@ body, html {
     <script type="text/javascript+protovis">
 
 	//the array from ruby of the mysql data
-var crimes = <%= raw @arrayPoi %>;
+	var modMoreBackImages = new Array();
+ modMoreBackImages = <%= raw @arrayPois %>;
 
 
 /*
@@ -78,22 +79,22 @@ Canvas.prototype.initialize = function(map) {
 
 Canvas.prototype.redraw = function(force) {
   if (!force) return;
-   c = this.canvas, m = this.map, r = 400;	//r changes how far the panel will be rendered/how far away from a crime a landmark will be rendered
+   c = this.canvas, m = this.map, r = 200;	//r changes how far the panel will be rendered/how far away from a crime a landmark will be rendered
 	
 	//used by backImages
-	var ipixels = backImages.map(function(d) {
+	var hpixels = backImages.map(function(d) {
       return m.fromLatLngToDivPixel(new GLatLng(d.lat, d.lon));
     });
 	
 	//used by moreBackImages
-	var hpixels = modMoreBackImages.map(function(d) {
+	var ipixels = modMoreBackImages.map(function(d) {
       return m.fromLatLngToDivPixel(new GLatLng(d.lat, d.lon));
     });
 
   /* Update the canvas bounds. Note: may be large. */
   function x(p) p.x; function y(p) p.y;
-  var x = { min: pv.min(pixels, x) - r, max: pv.max(pixels, x) + r };
-  var y = { min: pv.min(pixels, y) - r, max: pv.max(pixels, y) + r };
+  var x = { min: pv.min(hpixels, x) - r, max: pv.max(hpixels, x) + r };
+  var y = { min: pv.min(hpixels, y) - r, max: pv.max(hpixels, y) + r };
   c.style.width = (x.max - x.min) + "px";
   c.style.height = (y.max - y.min) + "px";
   c.style.left = x.min + "px";
@@ -107,20 +108,20 @@ Canvas.prototype.redraw = function(force) {
       .top(-y.min)
 	  
 	vis.add(pv.Panel)
-		.data(modMoreBackImages)
+		.data(backImages)
 	.add(pv.Image)
-	 .width(40)
-	 .height(40)
+	 .width(50)
+	 .height(50)
 
 	.url(function(x, d) d.url)
     .left(function() hpixels[this.parent.index].x - 15)	//modified -15 to place image correctly
     .top(function() hpixels[this.parent.index].y - 10)		//modified -10 to place image correctly
 
 	vis.add(pv.Panel)
-		.data(backImages)
+		.data(modMoreBackImages)
 	.add(pv.Image)
-	 .width(50)
-	 .height(50)
+	 .width(40)
+	 .height(40)
 	//	.width(function(d) -x.min  ) 
 	//	.height(function(d)  -y.min ) 
 
@@ -148,6 +149,7 @@ map.addOverlay(new Canvas(this.ucrimes));
   <body onunload="GUnload()">
 	<br>
 	<br>
+	
 	<div id="map"></div>
 	<br>
   </body>

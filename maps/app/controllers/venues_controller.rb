@@ -9,7 +9,7 @@ class VenuesController < ApplicationController
 
 	@arrayVenues = Venue.all.map{ |p|
 					p.getHash()
-					}
+				}
 	
 	 @arrayVenues = @arrayVenues.to_json
 
