@@ -76,7 +76,7 @@ class Poi < ActiveRecord::Base
 				@temp = { "id"=>  self.id, "lat"=>  self.lat, "lon"=>  self.lon , "types"=>  self.buildingType, "url"=>  "images\\l_airport.png" }
 			
 		end
-		#debugger
+		
 		return @temp
 	end
 end
